@@ -1,0 +1,590 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Aurora Café — Order Online</title>
+  <style>
+    :root{
+      --bg:#0f1113;
+      --card:#131517;
+      --muted:#bfc4c8;
+      --accent:#ffb86b;
+      --accent-2:#ffd9a8;
+      --glass: rgba(255,255,255,0.03);
+      --success:#2ecc71;
+    }
+    *{box-sizing:border-box}
+    body{
+      margin:0;
+      font-family: Inter, "Segoe UI", Roboto, system-ui, -apple-system, "Helvetica Neue", Arial;
+      background: linear-gradient(180deg,#071018 0%, #0f1113 60%);
+      color:#eee;
+      -webkit-font-smoothing:antialiased;
+      -moz-osx-font-smoothing:grayscale;
+    }
+
+    header{
+      padding:18px 28px;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:20px;
+      position:sticky;
+      top:0;
+      backdrop-filter: blur(6px);
+      background: linear-gradient(90deg, rgba(0,0,0,0.45), rgba(2,6,10,0.25));
+      border-bottom: 1px solid rgba(255,255,255,0.03);
+      z-index:50;
+    }
+    .brand{
+      display:flex;
+      align-items:center;
+      gap:14px;
+    }
+    .logo{
+      width:52px;height:52px;border-radius:12px;
+      background:linear-gradient(135deg,#ffb86b,#ffd9a8);
+      display:flex;align-items:center;justify-content:center;font-weight:700;color:#0b0b0b;
+      box-shadow: 0 6px 18px rgba(255,184,107,0.12), inset 0 -6px 18px rgba(255,217,168,0.06);
+      font-family: "Segoe UI", Roboto, sans-serif;
+    }
+    h1{font-size:18px;margin:0;color:#fff}
+    .tag{font-size:13px;color:var(--muted);margin-top:3px}
+
+    nav{display:flex;gap:14px;align-items:center}
+    nav a{color:var(--muted);text-decoration:none;font-weight:600;font-size:14px}
+    nav a:hover{color:var(--accent)}
+
+    main{max-width:1100px;margin:28px auto;padding:0 20px 120px}
+
+    .hero{
+      display:grid;grid-template-columns:1fr 340px;gap:28px;align-items:center;margin-bottom:30px;
+    }
+    .hero-card{
+      background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
+      border-radius:14px;padding:28px;border:1px solid rgba(255,255,255,0.03);
+      box-shadow: 0 8px 30px rgba(0,0,0,0.6);
+    }
+    .hero h2{margin:0;font-size:32px;color:var(--accent-2)}
+    .hero p{color:var(--muted);margin-top:12px;line-height:1.5}
+
+    .hours{
+      margin-top:14px;font-size:14px;color:var(--muted)
+    }
+
+    .cta-row{display:flex;gap:12px;margin-top:18px}
+    .btn{
+      border: none; cursor:pointer; padding:12px 16px; border-radius:10px;font-weight:700;
+      background:var(--accent); color:#081017; box-shadow: 0 8px 22px rgba(255,184,107,0.12);
+    }
+    .btn.secondary{background:transparent;border:1px solid rgba(255,255,255,0.04);color:var(--muted);font-weight:600}
+
+    /* MENU */
+    .menu-grid{
+      display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:18px;
+      margin-top:18px;
+    }
+    .item{
+      background:var(--card);padding:16px;border-radius:12px;border:1px solid rgba(255,255,255,0.02);
+      display:flex;gap:12px;align-items:flex-start;
+    }
+    .thumb{
+      width:86px;height:86px;border-radius:10px;background:linear-gradient(135deg,#2b2f33,#111315);
+      display:flex;align-items:center;justify-content:center;color:var(--muted);font-weight:700;font-size:12px;
+      flex-shrink:0;
+    }
+    .meta h4{margin:0;font-size:16px;color:#fff}
+    .meta p{margin:6px 0 0;color:var(--muted);font-size:13px}
+    .meta .price{margin-top:8px;font-weight:800;color:var(--accent-2)}
+    .meta .actions{margin-top:10px;display:flex;gap:8px;align-items:center}
+    .small{font-size:13px;color:var(--muted)}
+
+    /* CART BAR */
+    .cart-bar{
+      position:fixed;right:22px;bottom:22px;background:linear-gradient(180deg,#0b0d0f,#0f1113);
+      border-radius:14px;padding:12px 14px;border:1px solid rgba(255,255,255,0.04);
+      display:flex;gap:12px;align-items:center;box-shadow: 0 18px 40px rgba(0,0,0,0.6);
+      z-index:60;
+    }
+    .cart-count{
+      background:var(--accent);color:#071017;padding:6px 9px;border-radius:9px;font-weight:800;
+    }
+    .cart-btn{background:transparent;border:none;color:var(--muted);font-weight:700;cursor:pointer;font-size:14px}
+
+    /* MODAL */
+    .modal-backdrop{
+      position:fixed;inset:0;background:rgba(2,6,10,0.6);display:flex;align-items:center;justify-content:center;
+      z-index:200;backdrop-filter: blur(4px);
+    }
+    .modal{
+      width:940px;max-width:96%;background:linear-gradient(180deg, #0e1113, #0b0f11);border-radius:12px;padding:18px;border:1px solid rgba(255,255,255,0.03);
+      color:#eee;box-shadow: 0 30px 80px rgba(2,6,10,0.8);
+      max-height:86vh;overflow:auto;
+    }
+    .modal h3{margin:6px 0 12px;color:var(--accent-2)}
+    .cart-list{display:flex;flex-direction:column;gap:12px}
+    .cart-row{display:flex;justify-content:space-between;gap:12px;align-items:center;padding:10px;border-radius:10px;background:rgba(255,255,255,0.01)}
+    .cart-row .left{display:flex;gap:12px;align-items:center}
+    .qty{background:rgba(255,255,255,0.03);padding:6px 8px;border-radius:8px;font-weight:700}
+    .mini{font-size:13px;color:var(--muted)}
+
+    /* checkout form */
+    .checkout{
+      margin-top:16px;border-top:1px dashed rgba(255,255,255,0.03);padding-top:14px;
+      display:grid;grid-template-columns:1fr 360px;gap:16px;
+    }
+    .field{display:flex;flex-direction:column;gap:6px;margin-bottom:6px}
+    label{font-size:13px;color:var(--muted)}
+    input, select, textarea{
+      padding:10px;border-radius:8px;border:none;background:rgba(255,255,255,0.02);color:#eee;
+    }
+    .pay-box{background:rgba(255,255,255,0.02);padding:12px;border-radius:10px}
+    .pay-method{display:flex;gap:8px;align-items:center;margin-bottom:12px}
+    .pay-method input{accent-color:var(--accent)}
+
+    .small-muted{font-size:13px;color:var(--muted)}
+
+    .finish-btn{width:100%;padding:12px;border-radius:10px;border:none;background:var(--accent);color:#071017;font-weight:800;cursor:pointer}
+
+    .success{
+      padding:16px;border-radius:10px;background:linear-gradient(180deg, rgba(46,204,113,0.08), rgba(46,204,113,0.03));
+      border:1px solid rgba(46,204,113,0.08);color:var(--success);font-weight:700;margin-top:12px;
+    }
+
+    footer{max-width:1100px;margin:40px auto 90px;padding:0 20px;color:var(--muted);font-size:13px}
+    @media(max-width:880px){
+      .hero{grid-template-columns:1fr;gap:16px}
+      .checkout{grid-template-columns:1fr}
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <div class="brand">
+    <div class="logo">A</div>
+    <div>
+      <h1>Aurora Café</h1>
+      <div class="tag">Cozy. Local. Crafted with care.</div>
+    </div>
+  </div>
+
+  <nav>
+    <a href="#menu">Menu</a>
+    <a href="#about">About</a>
+    <a href="#visit">Visit</a>
+    <a href="#contact">Contact</a>
+  </nav>
+</header>
+
+<main>
+  <section class="hero">
+    <div class="hero-card">
+      <h2>Warm flavors. Bright mornings.</h2>
+      <p>Welcome to Aurora Café — neighbourhood coffeehouse serving hand-crafted drinks and freshly-baked pastries. Order ahead for pickup and skip the line.</p>
+      <div class="hours"><strong>Open:</strong> Mon–Sun · 7:00 AM – 8:00 PM</div>
+      <div class="cta-row">
+        <button class="btn" onclick="scrollToMenu()">Order Now</button>
+        <button class="btn secondary" onclick="showAbout()">Our Story</button>
+      </div>
+
+      <div style="margin-top:18px;color:var(--muted);font-size:13px">
+        <strong>Pickup ETA:</strong> 10–18 minutes after order (approx).
+      </div>
+    </div>
+
+    <aside style="background:linear-gradient(180deg,#0b1112,#071018);border-radius:12px;padding:18px;border:1px solid rgba(255,255,255,0.03);">
+      <h3 style="margin:0 0 6px;color:var(--accent-2)">Today's Special</h3>
+      <div style="color:var(--muted);line-height:1.45">Honey Lavender Latte &amp; Lemon Poppy Scone — a bright, floral combo to start your day right.</div>
+
+      <div style="margin-top:12px">
+        <div style="display:flex;justify-content:space-between;align-items:center">
+          <div class="small-muted">Address</div>
+          <div class="small-muted">500 Aurora Lane</div>
+        </div>
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-top:8px">
+          <div class="small-muted">Phone</div>
+          <div class="small-muted">+1 (555) 014-889</div>
+        </div>
+      </div>
+    </aside>
+  </section>
+
+  <section id="menu">
+    <h3 style="color:var(--accent-2);margin:8px 0 10px">Menu</h3>
+    <div class="menu-grid" id="menuGrid">
+      <!-- menu items inserted by JS -->
+    </div>
+  </section>
+
+  <section id="about" style="margin-top:26px">
+    <h3 style="color:var(--accent-2)">About Aurora</h3>
+    <p style="color:var(--muted);line-height:1.6">
+      Aurora Cafe is a family-run coffeehouse focused on carefully sourced beans, seasonal pastries, and a friendly space where neighbors gather.
+      We roast and brew with attention and joy — and we love serving the community.
+    </p>
+  </section>
+
+  <section id="visit" style="margin-top:26px">
+    <h3 style="color:var(--accent-2)">Visit Us</h3>
+    <p style="color:var(--muted)">500 Aurora Lane, Downtown — next to The Grove. Open daily 7am–8pm. Walk-ins welcome — order ahead to skip the queue.</p>
+    <!-- pretend map image -->
+    <div style="margin-top:12px;border-radius:10px;overflow:hidden;border:1px solid rgba(255,255,255,0.03)">
+      <img alt="map" src="https://images.unsplash.com/photo-1509395176047-4a66953fd231?q=80&w=1200&auto=format&fit=crop&ixlib=rb-4.0.3&s=6b8ad8f8a4a1e2d6b2b2d7f8a4b7f6c2" style="width:100%;display:block;filter:grayscale(10%) brightness(0.85)">
+    </div>
+  </section>
+
+  <section id="contact" style="margin-top:26px">
+    <h3 style="color:var(--accent-2)">Contact</h3>
+    <p style="color:var(--muted)">Email: <a href="mailto:aurora@example.com" style="color:var(--accent-2)">aurora@example.com</a></p>
+    <p style="color:var(--muted)">Phone: +1 (555) 014-889</p>
+    <p style="color:var(--muted)">Follow: <span style="color:var(--muted)">@auroracafe</span></p>
+  </section>
+
+</main>
+
+<!-- Cart Button -->
+<div class="cart-bar" role="region" aria-label="Cart">
+  <div style="display:flex;align-items:center;gap:10px">
+    <div style="font-size:13px;color:var(--muted)">Cart</div>
+    <div class="cart-count" id="cartCount">0</div>
+  </div>
+  <div style="display:flex;gap:8px">
+    <button class="cart-btn" onclick="openCart()">View / Checkout</button>
+    <button class="cart-btn" onclick="clearCart()">Clear</button>
+  </div>
+</div>
+
+<!-- Modal container (hidden unless needed) -->
+<div id="modalRoot" style="display:none"></div>
+
+<footer>
+  <div style="display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap">
+    <div>© 2025 Aurora Café · Made by BlueWave Digital</div>
+    <div style="color:var(--muted)">Pickup ETA: 10–18 min · No-contact pickup available</div>
+  </div>
+</footer>
+
+<script>
+  /***********************
+   * Data & rendering
+   ***********************/
+  const MENU = [
+    { id: 'latte', name: 'Classic Latte', desc: 'Espresso + steamed milk. Smooth finish.', price: 4.50, tag:'drink' },
+    { id: 'honey-lavender', name: 'Honey Lavender Latte', desc: 'House honey & lavender syrup. Seasonal favorite.', price: 5.75, tag:'seasonal' },
+    { id: 'americano', name: 'Americano', desc: 'Double espresso, hot water.', price: 3.25, tag:'drink' },
+    { id: 'cappuccino', name: 'Cappuccino', desc: 'Espresso with foamed milk.', price: 4.25, tag:'drink' },
+    { id: 'cortado', name: 'Cortado', desc: 'Balanced espresso & milk.', price: 3.95, tag:'drink' },
+    { id: 'choc-muffin', name: 'Chocolate Muffin', desc: 'Baked fresh daily.', price: 3.25, tag:'pastry' },
+    { id: 'poppy-scone', name: 'Lemon Poppy Scone', desc: 'Tangy & tender.', price: 3.50, tag:'pastry' },
+    { id: 'avocado-toast', name: 'Avocado Toast', desc: 'Sourdough, smashed avocado, chili flakes.', price: 6.50, tag:'food' },
+    { id: 'choc-croissant', name: 'Chocolate Croissant', desc: 'Flaky, buttery, filled with dark chocolate.', price: 3.95, tag:'pastry' },
+    { id: 'iced-coffee', name: 'Iced Coffee', desc: 'Cold brew style.', price: 3.75, tag:'drink' }
+  ];
+
+  const menuGrid = document.getElementById('menuGrid');
+  const cartCount = document.getElementById('cartCount');
+
+  function renderMenu(){
+    menuGrid.innerHTML = '';
+    MENU.forEach(item=>{
+      const el = document.createElement('div');
+      el.className = 'item';
+      el.innerHTML = `
+        <div class="thumb">${item.tag.toUpperCase()}</div>
+        <div class="meta">
+          <h4>${item.name}</h4>
+          <p>${item.desc}</p>
+          <div class="price">$${item.price.toFixed(2)}</div>
+          <div class="actions">
+            <button class="btn" onclick="addToCart('${item.id}')">Add</button>
+            <button class="btn secondary" onclick="addToCart('${item.id}',2)">+2</button>
+            <div style="flex:1"></div>
+            <div class="small">${item.tag}</div>
+          </div>
+        </div>
+      `;
+      menuGrid.appendChild(el);
+    });
+  }
+
+  // initial render
+  renderMenu();
+
+  /***********************
+   * Cart logic (local)
+   ***********************/
+  const CART_KEY = 'aurora_demo_cart_v1';
+  function loadCart(){
+    try{
+      return JSON.parse(localStorage.getItem(CART_KEY) || '{}');
+    }catch(e){ return {} }
+  }
+  function saveCart(cart){
+    localStorage.setItem(CART_KEY, JSON.stringify(cart));
+    updateCartUI();
+  }
+  function updateCartUI(){
+    const cart = loadCart();
+    const totalItems = Object.values(cart).reduce((s,i)=>s + i.qty,0);
+    cartCount.innerText = totalItems;
+  }
+  function addToCart(id, qty = 1){
+    const item = MENU.find(m=>m.id===id);
+    if(!item) return;
+    const cart = loadCart();
+    if(!cart[id]) cart[id] = { ...item, qty:0 };
+    cart[id].qty += qty;
+    saveCart(cart);
+    // tiny success feedback
+    const prev = document.querySelector('.cart-bar');
+    prev.animate([{ transform: 'translateY(0)' }, { transform:'translateY(-6px)' }, { transform:'translateY(0)'}], {duration:260});
+  }
+  function clearCart(){
+    localStorage.removeItem(CART_KEY);
+    updateCartUI();
+    alert('Cart cleared (demo).');
+  }
+  updateCartUI();
+
+  /***********************
+   * Cart modal / checkout
+   ***********************/
+  function openCart(){
+    const cart = loadCart();
+    const items = Object.values(cart);
+    const root = document.getElementById('modalRoot');
+    root.innerHTML = ''; root.style.display='block';
+    const backdrop = document.createElement('div');
+    backdrop.className='modal-backdrop';
+    const modal = document.createElement('div'); modal.className='modal';
+
+    // cart list
+    const subtotal = items.reduce((s,i)=>s + i.qty * i.price,0);
+    modal.innerHTML = `
+      <div style="display:flex;justify-content:space-between;align-items:center;gap:10px">
+        <h3>Your Order</h3>
+        <div style="display:flex;gap:10px;align-items:center">
+          <div class="small-muted">Items: ${items.length}</div>
+          <button class="btn secondary" onclick="closeModal()">Close</button>
+        </div>
+      </div>
+      <div class="cart-list" id="cartList"></div>
+
+      <div class="checkout" id="checkoutArea">
+        <div>
+          <div class="field"><label>Name</label><input id="c_name" placeholder="Your name (for pickup)" /></div>
+          <div class="field"><label>Phone</label><input id="c_phone" placeholder="Phone or contact" /></div>
+          <div class="field"><label>Notes (optional)</label><textarea id="c_notes" rows="3" placeholder="Allergies or notes"></textarea></div>
+          <div class="field">
+            <label>Pickup time</label>
+            <select id="c_time">
+              <option>ASAP (10–18 min)</option>
+              <option>In 30 minutes</option>
+              <option>In 1 hour</option>
+            </select>
+          </div>
+        </div>
+
+        <aside class="pay-box">
+          <div style="display:flex;justify-content:space-between;align-items:center">
+            <div>
+              <div class="small-muted">Subtotal</div>
+              <div style="font-weight:800;font-size:18px">$${subtotal.toFixed(2)}</div>
+            </div>
+            <div style="text-align:right">
+              <div class="small-muted">Tax</div>
+              <div style="font-weight:700">$${(subtotal*0.08).toFixed(2)}</div>
+            </div>
+          </div>
+
+          <div style="margin-top:12px" class="small-muted">Choose payment</div>
+
+          <div style="margin-top:8px" class="pay-method">
+            <input type="radio" name="pay" id="pay_card" value="card" checked />
+            <label for="pay_card">Pay with Card (demo)</label>
+          </div>
+          <div class="pay-method">
+            <input type="radio" name="pay" id="pay_cash" value="cash" />
+            <label for="pay_cash">Pay on Pickup (Cash / Card at counter)</label>
+          </div>
+
+          <div id="cardForm" style="margin-top:12px">
+            <div class="field"><label>Cardholder Name</label><input id="card_name" placeholder="Name on card" /></div>
+            <div class="field"><label>Card Number</label><input id="card_number" placeholder="4242 4242 4242 4242" /></div>
+            <div style="display:flex;gap:8px">
+              <div class="field" style="flex:1"><label>Expiry</label><input id="card_exp" placeholder="MM/YY" /></div>
+              <div class="field" style="flex:1"><label>CVC</label><input id="card_cvc" placeholder="123" /></div>
+            </div>
+            <div class="small-muted" style="margin-top:6px">*This is a demo payment. No real charges will be made.</div>
+          </div>
+
+          <div style="margin-top:12px">
+            <button class="finish-btn" onclick="processOrder()">Place Order</button>
+          </div>
+
+        </aside>
+      </div>
+    `;
+
+    backdrop.appendChild(modal);
+    root.appendChild(backdrop);
+
+    // populate cart rows
+    const cartList = modal.querySelector('#cartList');
+    if(items.length===0){
+      cartList.innerHTML = '<div style="padding:18px;color:var(--muted)">Your cart is empty. Add items from the menu.</div>';
+      const checkoutArea = modal.querySelector('#checkoutArea');
+      checkoutArea.style.display='none';
+    }else{
+      items.forEach(it=>{
+        const row = document.createElement('div'); row.className='cart-row';
+        row.innerHTML = `
+          <div class="left">
+            <div style="width:56px;height:56px;border-radius:8px;background:linear-gradient(135deg,#111,#0b0b0b);display:flex;align-items:center;justify-content:center">${it.name.split(' ')[0]}</div>
+            <div>
+              <div style="font-weight:800">${it.name}</div>
+              <div class="mini">${it.qty} × $${it.price.toFixed(2)}</div>
+            </div>
+          </div>
+          <div style="text-align:right">
+            <div style="font-weight:800">$${(it.qty*it.price).toFixed(2)}</div>
+            <div style="margin-top:8px;display:flex;gap:8px;justify-content:flex-end">
+              <button class="btn secondary" onclick="changeQty('${it.id}', -1)">−</button>
+              <div class="qty">${it.qty}</div>
+              <button class="btn" onclick="changeQty('${it.id}', 1)">+</button>
+              <button class="btn secondary" style="margin-left:8px" onclick="removeItem('${it.id}')">Remove</button>
+            </div>
+          </div>
+        `;
+        cartList.appendChild(row);
+      });
+    }
+
+    // event: toggle card fields when payment method changed
+    modal.querySelectorAll('input[name="pay"]').forEach(r=>{
+      r.addEventListener('change', ()=>{
+        const cardForm = modal.querySelector('#cardForm');
+        if(document.querySelector('input[name="pay"]:checked').value === 'card') cardForm.style.display='block';
+        else cardForm.style.display='none';
+      });
+    });
+
+    // attach some helpers to modal for later actions
+    modal.dataset.subtotal = subtotal.toFixed(2);
+    // store modal globally for use in processOrder()
+    window._aurora_modal = { root, modal, backdrop };
+  }
+
+  function closeModal(){
+    const root = document.getElementById('modalRoot');
+    root.style.display='none';
+    root.innerHTML = '';
+  }
+
+  function changeQty(id, delta){
+    const cart = loadCart();
+    if(!cart[id]) return;
+    cart[id].qty += delta;
+    if(cart[id].qty <= 0) delete cart[id];
+    saveCart(cart);
+    // re-open cart to refresh modal
+    openCart();
+  }
+  function removeItem(id){
+    const cart = loadCart();
+    if(cart[id]) delete cart[id];
+    saveCart(cart);
+    openCart();
+  }
+
+  /***********************
+   * Fake payment / order
+   ***********************/
+  function processOrder(){
+    const modalObj = window._aurora_modal;
+    if(!modalObj) return;
+    const modal = modalObj.modal;
+
+    // basic validation
+    const name = modal.querySelector('#c_name').value.trim();
+    const phone = modal.querySelector('#c_phone').value.trim();
+    if(!name || !phone){
+      alert('Please provide your name and phone for pickup.');
+      return;
+    }
+
+    const payMethod = modal.querySelector('input[name="pay"]:checked').value;
+    if(payMethod === 'card'){
+      const cn = modal.querySelector('#card_number').value.trim();
+      const cv = modal.querySelector('#card_cvc').value.trim();
+      // very light validation only (demo)
+      if(!cn || !cv){
+        alert('Enter demo card number and CVC (no real charge will happen).');
+        return;
+      }
+    }
+
+    // disable button and show processing
+    const btn = modal.querySelector('.finish-btn');
+    btn.disabled = true;
+    btn.innerText = 'Processing...';
+
+    // simulate processing delay
+    setTimeout(()=>{
+      // pretend response success
+      const fakeTx = 'AUR-' + Math.random().toString(36).slice(2,9).toUpperCase();
+      const cart = loadCart();
+      const items = Object.values(cart);
+      const subtotal = items.reduce((s,i)=>s + i.qty * i.price,0);
+      const tax = subtotal * 0.08;
+      const total = subtotal + tax;
+
+      // show success summary
+      modal.querySelector('#cartList').innerHTML = `
+        <div class="success">Order confirmed — Thank you, ${modal.querySelector('#c_name').value}!</div>
+        <div style="margin-top:12px">
+          <strong>Order ID:</strong> ${fakeTx}<br>
+          <strong>Pickup:</strong> ${modal.querySelector('#c_time').value}<br>
+          <strong>Payment:</strong> ${payMethod === 'card' ? 'Card (demo)' : 'Pay on Pickup'}<br>
+          <strong>Total:</strong> $${total.toFixed(2)}
+        </div>
+      `;
+
+      // clear checkout area
+      modal.querySelector('#checkoutArea').innerHTML = `
+        <div style="margin-top:12px">
+          <button class="finish-btn" onclick="closeModal()">Done</button>
+        </div>
+      `;
+
+      // clear saved cart
+      localStorage.removeItem(CART_KEY);
+      updateCartUI();
+
+      // tiny "receipt" in console (demo only)
+      console.log('Aurora Demo Order', { id: fakeTx, name, phone, items, total });
+
+      // re-enable button text (if modal still open)
+      btn.disabled = false;
+      btn.innerText = 'Place Order';
+    }, 1400);
+  }
+
+  /***********************
+   * small helpers
+   ***********************/
+  function scrollToMenu(){ document.querySelector('#menu').scrollIntoView({behavior:'smooth'}); }
+  function showAbout(){ document.querySelector('#about').scrollIntoView({behavior:'smooth'}); }
+
+  // re-open cart if cart changes elsewhere
+  window.addEventListener('storage', ()=> updateCartUI());
+
+  // expose loadCart to console for debugging if you want
+  window._aurora = { loadCart, MENU };
+
+</script>
+
+</body>
+</html>
